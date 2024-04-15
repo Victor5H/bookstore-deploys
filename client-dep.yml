@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-dep
+  labels:
+    app: client-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client-pod
+  template:
+    metadata:
+      labels:
+        app: client-pod
+    spec:
+      containers:
+      - name: client-cont
+        image: iahs5/book-store-client:1.3
+        ports:
+        - containerPort: 3005
+        env:
+        - name: VITE_PORT
+          value: '3005'
+        - name: VITE_HOST
+          value: server-service.default.svc.cluster.local
+        - name: VITE_SERVER_PORT
+          value: '5137'
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-service
+spec:
+  type: NodePort
+  selector:
+    app: client-pod 
+  ports:
+    - protocol: TCP
+      port: 3005
+      targetPort: 3005
+      nodePort: 30001
